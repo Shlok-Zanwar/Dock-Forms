@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Respond</title>
+</head>
+
+<style>
+
+.main_div{
+  border-top: 8px outset blueviolet;
+  background-color:whitesmoke; 
+  padding: 10px 20px 15px;
+  width: 700px;
+  left: 25%;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  position: relative;
+  font-size: large;
+  z-index: 1;
+}
+
+.table_buttons{
+  width: 10%;
+  height: 100%;
+  left: 35%;
+  border-radius: 10px;  
+  padding: 8px 15px;   
+  display: inline-block;   
+  border: 4px solid blueviolet;   
+  box-sizing: border-box; 
+  cursor: pointer;
+}
+
+
+</style>
+
+<body bgcolor="#d1c4e9" onload="validate_login()">
+<br>
+
+<script>
+
+    typeOfQuestion = []
+    response_ans = []
+    correct_ans = []
+
+
+
+    function validate_login(){
+        if(localStorage.getItem('login') == 'true'){
+         check_acceptance()
+        }
+
+        else{
+         alert("please login first");
+         window.location.href = "http://127.0.0.1:5000/";
+        }
+
+    }
+
+
+    function check_acceptance(){
+        var http = new XMLHttpRequest();
+        var myJSON = localStorage.getItem('respond_to_form');
+        http.open("POST", "/accountLoginDetails", false);
+        http.send(myJSON);
+        result = JSON.parse(http.responseText);
+    
+        if(result['Status']=='Accepted-data'){
+            localStorage.setItem('respond_json', JSON.stringify(result))
+            get_all_details()
+        }
+        else{
+            alert(result['Status'])
+            window.location.href = "/home"
+        }
+
+    }
+
+
+    function get_all_details(){
+        form_data = JSON.parse(localStorage.getItem('respond_json'))
+        // alert(localStorage.getItem('respond_json'))
+
+        document.body.innerHTML += "<div class='main_div'>"+
+                                   "<h2>"+form_data['Title']+"</h2>"+
+                                   "<h4>"+form_data['Description']+"</h4>"+
+                                   "</div>"
+
+        var i = 0;
+
+        while(i < form_data['Questions'].length){
+
+            division_id = "DIV_"+i
+            typeOfQuestion.push(form_data['Questions'][i]['Question_type'])
+            document.body.innerHTML += "<br><div class='main_div' id="+division_id+">"+
+                                       "<b>"+form_data['Questions'][i]['Question']+"</b>"+
+                                       "</div>"
+            
+            switch(form_data['Questions'][i]['Question_type']){
+
+                case 'Multiple Choice':
+
+                    num_of_opt = 0
+                    radioname = "RADIONAME_"+i
+                    while(num_of_opt < form_data['Questions'][i]['Options'].length){
+
+                        radioid = "RADIO_"+i+"_"+num_of_opt
+
+                        document.getElementById(division_id).innerHTML += "<br><br>"+
+                                                                          "<input type='radio' id="+radioid+" name="+radioname+">&nbsp&nbsp"+
+                                                                          "<label for="+radioid+">"+form_data['Questions'][i]['Options'][num_of_opt]+"</label>"
+                        num_of_opt += 1
+                    }
+                    break;
+
+                case 'Range Type':
+                    
+                    ansboxid = "ANSBOX_"+i
+                    document.getElementById(division_id).innerHTML += "<br><br>"+
+                                                                      "<input type='number' id="+ansboxid+" class='' placeholder='Answer' >"
+
+                    break;
+
+                case 'Text Type':
+
+                    ansboxid = "ANSBOX_"+i
+                    document.getElementById(division_id).innerHTML += "<br><br>"+
+                                                                      "<input type='text' id="+ansboxid+" class='' placeholder='Answer' >"
+                    break;
+
+
+
+            }
+
+            i += 1
+        }
+
+        document.body.innerHTML += "<center><br><br><input type='submit' class='table_buttons' onclick='validate_response()' ><br><br><br><br></center>"
+                                
+    }
+
+
+    function validate_response(){
+        form_data = JSON.parse(localStorage.getItem('respond_json'))
+        var marks = 0;
+        var total_marks = 0;
+
+        i= 0
+        while(i< typeOfQuestion.length){
+            
+            switch(typeOfQuestion[i]){
+                case 'Multiple Choice':
+                    //getting selected radio
+                    for(j=0; j<form_data['Questions'][i]['Options'].length; j += 1 ){
+                        radioid = "RADIO_"+i+"_"+j;
+                        if(document.getElementById(radioid).checked == true){
+                            mcqans = j
+                        }
+                    }
+
+                    response_ans.push(form_data['Questions'][i]['Options'][mcqans])
+                    //alert(form_data['Questions'][i]['Correct_ans'])
+
+                    if (form_data['Questions'][i]['Correct_ans'] != null){
+                        corr = form_data['Questions'][i]['Correct_ans']
+                        correct_ans.push(form_data['Questions'][i]['Options'][corr])
+                        if( mcqans == form_data['Questions'][i]['Correct_ans']){
+                            marks += 1;
+                            total_marks += 1;
+                        }
+                        else{
+                            total_marks += 1;
+                        }
+
+                    }
+                    else{
+                        correct_ans.push("None")
+                    }
+
+                    break;
+
+                case 'Range Type':
+                    
+                    ansboxid = "ANSBOX_"+i
+                    rangeAns = document.getElementById(ansboxid).value
+                    
+                    response_ans.push(rangeAns)
+
+                    min = form_data['Questions'][i]['min_range']
+                    max = form_data['Questions'][i]['max_range']
+
+                    arr = [min, max]
+                    correct_ans.push(arr)
+
+                    if(rangeAns >= min && rangeAns <= max){
+                        marks += 1
+                        total_marks += 1
+                    }
+                    else{
+                        total_marks += 1
+                    }
+
+                    break;
+
+                case 'Text Type':
+                    ansboxid = "ANSBOX_"+i
+                    response_ans.push(document.getElementById(ansboxid).value)
+                    correct_ans.push("None")
+                    break;
+            }
+
+            i += 1
+        }
+        
+        
+        send_data_to_store(total_marks, marks)
+    }
+
+
+    function send_data_to_store(total_marks, marks){
+        data_json = {
+            'User_ID':localStorage.getItem('login_id'),
+            'QPaper_ID':localStorage.getItem('formIdToRespond'),
+            'Responses':response_ans,
+            'Total_marks':total_marks,
+            'Marks':marks
+        }
+
+        form_data = JSON.parse(localStorage.getItem('respond_json'))
+        
+
+        if(form_data['Settings']['Show_correct'] == true){
+            message = "Correct Answers\n\n"
+            i = 0
+            while(i < correct_ans.length){
+                ques_no = i+1
+                message += "Question "+ques_no+" : "+correct_ans[i]+"\n"
+                i += 1
+            }
+            message += "\nYour Marks : "+marks+" / "+total_marks
+            alert(message)
+        }
+
+        //alert(JSON.stringify(data_json))
+
+        var http = new XMLHttpRequest();
+        var myJSON = JSON.stringify(data_json);
+        http.open("POST", "/respondFormDetails", false);
+        http.send(myJSON);
+        old_data = http.responseText;
+        alert(old_data)
+        //localStorage.setItem('respond_json', "")
+        window.location.href = "http://127.0.0.1:5000/home"
+    }
+
+
+
+</script>
+
+
+</body>
+</html>

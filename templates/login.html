@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<style>
+.main_div{
+    border: 1.5px outset black;
+    padding: 5px 20px 15px;
+    background-color:rgb(204, 238, 238); 
+    width: 400px;
+    border-radius: 5px;
+    left: 35%;
+    top: 12%;
+    position: absolute;
+    
+}
+
+.otp_div{
+    border: 3px outset black;
+    padding: 10px 20px 15px;
+    background-color:rgb(42, 218, 218); 
+    width: 200px;
+    border-radius: 5px;
+    left: 41%;
+    top: 30%;
+    position: absolute;
+    
+}
+
+input[type=text], input[type=password], input[type=number] {   
+        width: 100%;   
+        margin: 8px 0;  
+        padding: 12px 20px;   
+        display: inline-block;   
+        border: 2px solid green;   
+        box-sizing: border-box;   
+    }
+
+button:hover {   
+        opacity: 0.7;   
+    }   
+
+.login_button {   
+        background-color: #4CAF50;   
+        width: 40%;  
+        color: black;   
+        padding: 15px;
+        border-radius: 5px;   
+        margin: 10px 0px;   
+        border: none;   
+        cursor: pointer;
+    }   
+
+.signup_button {   
+    background-color: #53cae7;   
+    width: 40%;  
+    color: black;   
+    padding: 15px;
+    border-radius: 5px;   
+    margin: 10px 0px;   
+    border: none;   
+    cursor: pointer;   
+    }   
+
+
+</style>
+
+
+<body onload="onload()" bgcolor="#d1c4e9">
+
+<div class="main_div" id="signin_div">
+    <center><h1>Sign In</h1></center>
+    <label for="USERNAME">User Name :</label><br>
+    <input type="text" id="USERNAME" onclick="erase_email()">
+    <center><h3>OR</h3></center>
+    <label for="EMAIL">EMail ID :</label><br>
+    <input type="text" id="EMAIL" onclick="erase_username()"><br><br><br>
+    <label for="PASSWORD">Password :</label>
+    <input type="password" id="PASSWORD">
+    <br><br>
+    <center>
+    <input type="submit" value="Login" onclick="validate_login()" class="login_button">
+    <input type="submit" value="Sign Up" onclick="unhide_signup()" class="signup_button">
+    </center>
+</div>
+
+
+<div class="main_div" id="signup_div" hidden>
+    <center><h1>Sign Up</h1></center>
+    <label for="FULLNAME_NEW">Full Name :</label><br>
+    <input type="text" id="FULLNAME_NEW"> 
+    <label for="USERNAME_NEW">User Name :</label><br>
+    <input type="text" id="USERNAME_NEW">
+    <label for="EMAIL_NEW">Email Id :</label><br>
+    <input type="text" id="EMAIL_NEW">
+    <br><br><br>
+    <label for="PASSWORD_NEW">Password :</label><br>
+    <input type="password" id="PASSWORD_NEW">
+    <label for="PASSWORD_CHECK">Re-enter Password :</label><br>
+    <input type="password" id="PASSWORD_CHECK">
+    <center>
+    <input type="submit" value="Sign Up" onclick="validate_signup()" class="login_button" onsubmit="return false">
+    <input type="submit" value="Have an account !" onclick="hide_signup()" class="signup_button">
+    </center>
+</div>
+
+
+<div class="otp_div" id="otp_div" hidden>
+    <label for="OTP">Enter Otp (Email): </label> <br>
+    <input type="number" id="OTP">
+    <center>
+    <input type="submit" value="Verify" onclick="check_otp()" class="login_button" id="submit_otp">
+    <input type="submit" value="Cancel" onclick="hide_otpdiv()" class="signup_button">
+    </center> 
+</div>
+
+
+</body>
+
+<script>
+
+    function erase_username(){
+        document.getElementById('USERNAME').value = ""
+    }
+
+    function erase_email(){
+        document.getElementById('EMAIL').value = ""
+    }
+
+
+    function onload(){
+        localStorage.setItem("login", 'false')
+    }
+
+
+    function hide_signup(){
+        document.getElementById('signup_div').setAttribute('hidden', true)
+    }
+
+    function unhide_signup(){
+        document.getElementById('signup_div').removeAttribute('hidden')
+    }
+
+    function hide_otpdiv(){
+        document.getElementById('otp_div').setAttribute('hidden', true)
+    }
+
+
+    function validate_signup(){
+        
+        document.getElementById('FULLNAME_NEW').value =  document.getElementById('FULLNAME_NEW').value.trim()
+        document.getElementById('USERNAME_NEW').value =  document.getElementById('USERNAME_NEW').value.trim()
+        document.getElementById('EMAIL_NEW').value =  document.getElementById('EMAIL_NEW').value.trim()
+        document.getElementById('PASSWORD_NEW').value =  document.getElementById('PASSWORD_NEW').value.trim()
+        document.getElementById('PASSWORD_CHECK').value =  document.getElementById('PASSWORD_CHECK').value.trim()
+        
+
+        if (document.getElementById('PASSWORD_NEW').value == document.getElementById('PASSWORD_CHECK').value){
+            
+            verify = {
+                "Type":"SignUp-Check",
+                "Username":document.getElementById('USERNAME_NEW').value,
+                "Email":document.getElementById('EMAIL_NEW').value
+            }
+
+            var http = new XMLHttpRequest();
+            var myJSON = JSON.stringify(verify);
+
+            http.open("POST", "/accountLoginDetails", false);
+            http.send(myJSON);
+            result = JSON.parse(http.responseText)
+
+            if (result['Status'] == 'Accept Login'){
+                document.getElementById('otp_div').removeAttribute('hidden')
+                localStorage.setItem('otp', result['Otp'])
+                //document.getElementById('submit_otp').onclick = hello()
+
+            }
+
+            else{
+                alert(result['Status'])
+            }
+
+        }
+
+        else{
+            alert("Password didn't match")
+        }
+
+
+    }
+
+
+num_otp = 0
+
+
+    function check_otp(){
+        if (num_otp < 3){
+            if (document.getElementById('OTP').value == localStorage.getItem('otp')){
+                alert('otp match');
+                num_otp = 0
+                add_new_user()
+            }
+            else{
+                alert('no match')
+                num_otp += 1
+            }
+        }
+
+        else{
+            alert('You have attempted maxinmin times')
+            document.getElementById('OTP').value = ''
+            num_otp = 0
+            document.getElementById('otp_div').setAttribute('hidden', true)
+        }
+    }
+
+
+
+    function add_new_user(){
+        user_data = {
+            "Type": "SignUp-Verified",
+            "Fullname": document.getElementById('FULLNAME_NEW').value,
+            "Email": document.getElementById('EMAIL_NEW').value,
+            "Username": document.getElementById('USERNAME_NEW').value,
+            "Password": document.getElementById('PASSWORD_NEW').value
+        }
+
+        var http = new XMLHttpRequest();
+        var myJSON = JSON.stringify(user_data);
+        http.open("POST", "/accountLoginDetails", false);
+        http.send(myJSON);
+        
+        result = JSON.parse(http.responseText)
+
+        localStorage.setItem("login_id", result['User_ID'])
+        localStorage.setItem("login", 'true')
+        window.location.href = "/home"
+
+    }
+    
+
+
+
+    function validate_login(){
+
+        if(document.getElementById('USERNAME').value==""){
+            user_data = {
+                "Type":"SignIn-Email",
+                "Email":document.getElementById('EMAIL').value,
+                "Password":document.getElementById('PASSWORD').value
+            }
+        }
+
+        else{
+            user_data = {
+                "Type":"SignIn-Username",
+                "Username":document.getElementById('USERNAME').value,
+                "Password":document.getElementById('PASSWORD').value
+            }
+        }
+        
+
+        var http = new XMLHttpRequest();
+        var myJSON = JSON.stringify(user_data);
+
+        http.open("POST", "/accountLoginDetails", false);
+        http.send(myJSON);
+        
+        result = JSON.parse(http.responseText)
+
+
+        if (result['Status'] == 'Login Successful'){
+            localStorage.setItem("login_id", result['User_ID'])
+            localStorage.setItem("login", 'true')
+            window.location.href = "/home"
+        }
+
+        else{
+            alert(result['Status'] + " :( Please try again")
+        }
+
+    }
+
+
+</script>
+
+</html>

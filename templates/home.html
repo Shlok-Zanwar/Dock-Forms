@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<style>
+.topnav {
+  overflow: hidden;
+  position: fixed;
+  background-color: #333;
+  padding: 0px 0px 0px;
+  top: 0%;
+  width: 100%;
+}
+
+.topnav a {
+  margin-right: 20px;
+  float: right;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.topnav a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.main {
+  padding: 16px 60px 16px;
+  margin-top: 30px;
+  z-index: 1;
+}
+
+.form_details{
+    width: 85%;
+    padding: 0px 15px 15px;
+    border: 3px solid black;
+    border-radius: 5px;
+    min-width: 400px;
+    align-self: center;
+    align-items: center;
+    background-color: rgb(211, 169, 107);
+    
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: center;
+  padding: 8px 3px 8px;
+}
+
+
+.table_buttons{
+  width: 60%;
+  height: 100%;
+  border: transparent;
+  border-radius: 3px;  
+  padding: 8px 15px;   
+  display: inline-block;   
+  border: 2px solid green;   
+  box-sizing: border-box; 
+  cursor: pointer;
+}
+
+
+.createnew{
+  width: 11%;
+  height: 50%;
+  border: transparent;
+  border-radius: 3px;  
+  padding: 8px 15px;   
+  display: inline-block;   
+  border: 2px solid green;   
+  box-sizing: border-box; 
+  cursor: pointer;
+}
+
+input[type=checkbox]{
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+
+</style>
+
+
+<body onload="validate_login()" bgcolor="#d1c4e9">
+
+<div class="topnav">
+  <a href="#contact">Contact</a>
+  <a href="#about">About</a>
+  <a href="#response">Give Response</a>
+  <a class="active" href="#home">Home</a>
+</div>
+
+
+<div class="main" id="home">
+<br><br><br>
+    
+    <div class="form_details">
+      <h2>Create new  ......</h2>
+        <label style="font-size: larger;">Create form : &nbsp&nbsp&nbsp&nbsp</label>
+        <input type="submit" value="Create" onclick="edit_form(0)" class="createnew">
+        <br><br>
+        <label style="font-size: larger;">Create Room : &nbsp&nbsp</label>
+        <input type="submit" value="Create" onclick="edit_room(0)" class="createnew">
+    </div>
+    <br><br>
+
+    <hr style="height: 3px; color: black; background-color: black;">
+    <br><br>
+    
+    <div class="form_details" id="OLD_FORMS_DIV">
+      <h2>Your previously created forms</h2>
+      <table id="OLD_FORMS">
+        <colgroup>
+          <col style="width:40%">
+          <col style="width: 6%;">
+          <col style="width: 11%">
+          <col style="width:6%">
+          <col style="width: 15%">
+          <col style="width: 11%">
+          <col style="width: 11%">
+        </colgroup>
+        <tr>
+          <th>Title</th>
+          <th>Form ID</th>
+          <th>Edit Form</th>
+          <th>Accepting Response</th>
+          <th>Responses</th>
+          <th>Delete Form</th>
+          <th>Rooms</th>
+        </tr>
+      </table>
+    </div>
+
+    <br><br>
+    <hr style="height: 3px; color: black; background-color: black;">
+    <br><br>
+
+    <div class="form_details" id="OLD_ROOMS_DIV">
+      <h2>Your previously created rooms</h2>
+      <table id="OLD_ROOMS">
+        <colgroup>
+          <col style="width:10%">
+          <col style="width: 56%;">
+          <col style="width: 17%">
+          <col style="width: 17%">
+        </colgroup>
+        <tr>
+          <th>Room Id</th>
+          <th>Room Name</th>
+          <th>Edit Room</th>
+          <th>Delete Form</th>
+        </tr>
+      </table>
+    </div>
+
+    <br><br>
+    <hr style="height: 3px; color: black; background-color: black;">
+    <br><br>
+
+    <div id="response" class="form_details">
+      <h2>Respond a form</h2>
+      <label for="RESPOND" style="font-size: larger;">Enter Form ID : &nbsp&nbsp </label> 
+      <input type="number" id="RESPOND" class="createnew">
+      <input type="submit" class="createnew" onclick="respond_form()">
+    </div>
+    
+
+
+
+
+
+
+<script>
+
+id_details = {
+  'User_ID':localStorage.getItem('login_id')
+}
+
+
+function respond_form(){
+  
+  //check if filled and not float
+  if(document.getElementById('RESPOND').value == "" || document.getElementById('RESPOND').value != parseInt(document.getElementById('RESPOND').value)){
+    alert("Please Enter Valid Form ID")
+  }
+
+  else{
+    
+    send_data = {
+      'Type':'Respond-Form',
+      'User_ID':id_details['User_ID'],
+      'QPaper_ID':document.getElementById('RESPOND').value
+    }
+
+    localStorage.setItem('respond_to_form', JSON.stringify(send_data))
+    localStorage.setItem('formIdToRespond', document.getElementById('RESPOND').value)
+    window.location.href = "/respond"
+
+  }
+
+}
+
+
+
+
+function validate_login(){
+
+  //alert(id_details['User_ID'])
+
+  if(localStorage.getItem('login') == 'true'){
+    old_form_details()
+  }
+
+  else{
+    alert("please login first");
+    window.location.href = "http://127.0.0.1:5000/";
+  }
+
+}
+
+
+
+owned_room_ids = []
+
+function old_form_details(){
+
+  var http = new XMLHttpRequest();
+  var myJSON = JSON.stringify(id_details);
+
+  http.open("POST", "/homepageload", false);
+  http.send(myJSON);
+  old_data = JSON.parse(http.responseText);
+
+  //alert(JSON.stringify(old_data))
+
+  i = 0;
+  while (i < old_data['old_forms'].length){
+
+    checkboxid = "CHECKBOX_"+old_data['old_forms'][i]['QPaper_ID']
+    
+
+    if(old_data['old_forms'][i]['Accepting_responce'] == true){
+      
+      document.getElementById('OLD_FORMS').innerHTML += "<tr>"+
+                                                        "<td>"+old_data['old_forms'][i]['Title']+"</td>"+
+                                                        "<td>"+old_data['old_forms'][i]['QPaper_ID']+"</td>"+
+                                                        "<td><input type='submit' class='table_buttons' value='Edit' onclick='edit_form("+old_data['old_forms'][i]['QPaper_ID']+")'></td>"+                                                      
+                                                        "<td><input type='checkbox' onclick='checkbox("+old_data['old_forms'][i]['QPaper_ID']+")' id="+checkboxid+" checked></td>"+
+                                                        "<td><input type='submit' class='table_buttons' onclick='form_responses("+old_data['old_forms'][i]['QPaper_ID']+")' value='Responses'></td>"+
+                                                        "<td><input type='submit' class='table_buttons' onclick='delete_form("+old_data['old_forms'][i]['QPaper_ID']+")' value='Delete'> </td>"+
+                                                        "<td><input type='submit' class='table_buttons' onclick='make_rooms_div("+old_data['old_forms'][i]['QPaper_ID']+")' value='Rooms'></td>"+
+                                                        "</tr>"
+      //alert(document.getElementById)
+    }
+    else{
+      
+      document.getElementById('OLD_FORMS').innerHTML += "<tr>"+
+                                                        "<td>"+old_data['old_forms'][i]['Title']+"</td>"+
+                                                        "<td>"+old_data['old_forms'][i]['QPaper_ID']+"</td>"+
+                                                        "<td><input type='submit' class='table_buttons' value='Edit' onclick='edit_form("+old_data['old_forms'][i]['QPaper_ID']+")'></td>"+                                                      
+                                                        "<td><input type='checkbox' onclick='checkbox("+old_data['old_forms'][i]['QPaper_ID']+")' id="+checkboxid+"></td>"+
+                                                        "<td><input type='submit' class='table_buttons' onclick='form_responses("+old_data['old_forms'][i]['QPaper_ID']+")' value='Responses'></td>"+
+                                                        "<td><input type='submit' class='table_buttons' onclick='delete_form("+old_data['old_forms'][i]['QPaper_ID']+")' value='Delete'></td>"+
+                                                        "<td><input type='submit' class='table_buttons' onclick='make_rooms_div("+old_data['old_forms'][i]['QPaper_ID']+")' value='Rooms'></td>"+
+                                                        "</tr>"
+                                                        
+    }
+                                                      
+    i += 1
+  }
+
+  i = 0;
+  while(i < old_data['old_rooms'].length){
+    owned_room_ids.push([old_data['old_rooms'][i]['Room_ID'], old_data['old_rooms'][i]['Room_Name']])
+    document.getElementById('OLD_ROOMS').innerHTML += "<tr>"+
+                                                      "<td>"+old_data['old_rooms'][i]['Room_ID']+"</td>"+
+                                                      "<td>"+old_data['old_rooms'][i]['Room_Name']+"</td>"+
+                                                      "<td><input type='submit' class='table_buttons' value='Edit' onclick='edit_room("+old_data['old_rooms'][i]['Room_ID']+")'></td>"+
+                                                      "<td><input type='submit' class='table_buttons' value='Delete' onclick='delete_room("+old_data['old_rooms'][i]['Room_ID']+")'></td>"+
+                                                      "</tr>"
+
+    i += 1
+  }
+  conv = {
+    'old_rooms':owned_room_ids
+  }
+  //alert(owned_room_ids)
+  localStorage.setItem('owned_rooms', JSON.stringify(conv))
+}
+
+
+
+function make_rooms_div(QPaper_ID){
+  localStorage.setItem('formIdForRooms', QPaper_ID)
+  window.location.href = "/Form_Rooms"
+}
+
+
+function delete_room(Room_ID){
+  confirmation = confirm('Are you sure you want to delete ?\nOnce deleted you cannot get it back.')
+
+  if(confirmation == true){
+    send_data = {
+      'Status':'Delete Room',
+      'Room_ID':Room_ID
+    }
+    var http = new XMLHttpRequest();
+    var myJSON = JSON.stringify(send_data)
+    http.open("POST", "/roomDataInfo", false);
+    http.send(myJSON);
+
+    abc = http.responseText
+
+    location.reload()
+
+  }
+
+}
+
+
+function delete_form(QPaper_ID){
+  //alert(QPaper_ID)
+  confirmation = confirm('Are you sure you want to delete ?\nOnce deleted you cannot get it back.')
+
+  if(confirmation == true){
+    //alert("yess")
+    send_data = {
+      'Type':'Delete-Form',
+      'QPaper_ID':QPaper_ID
+    } 
+
+    var http = new XMLHttpRequest();
+    var myJSON = JSON.stringify(send_data);
+    http.open("POST", "/accountLoginDetails", false);
+    http.send(myJSON);
+    old_data = http.responseText;
+     
+    location.reload()
+  }
+
+  else{
+
+  }
+
+}
+
+
+
+function checkbox(QPaper_ID){
+  boxid =  "CHECKBOX_"+QPaper_ID
+
+  data = {
+    'Type':'Accepting-responces',
+    'QPaper_ID':QPaper_ID,
+    'Accepting_responce':document.getElementById(boxid).checked
+  }
+
+
+  var http = new XMLHttpRequest();
+  var myJSON = JSON.stringify(data);
+
+  http.open("POST", "/accountLoginDetails", false);
+  http.send(myJSON);
+  old_data = http.responseText;
+  //alert(old_data) 
+
+}
+
+
+
+function edit_room(room_id){
+  json = {
+    'User_ID':localStorage.getItem('login_id'),
+    'Room_ID':room_id
+  }
+
+  localStorage.setItem('room_id_info', JSON.stringify(json))
+  window.location.href = '/Create_Room'
+
+}
+
+
+
+function edit_form(form_id){
+  
+  json = {
+    'User_ID':localStorage.getItem('login_id'),
+    'QPaper_ID':form_id
+  }
+
+  //alert(form_id)
+
+  localStorage.setItem('ids_for_edit', JSON.stringify(json))
+  window.location.href = "/Create_Form"
+
+}
+
+
+
+function form_responses(form_id){
+  
+  json = {
+    'User_ID':localStorage.getItem('login_id'),
+    'QPaper_ID':form_id
+  }
+
+  //alert(form_id)
+
+  localStorage.setItem('ids_for_edit', JSON.stringify(json))
+  window.location.href = "/Form_Responses"
+
+}
+
+</script>
+
+
+</body>
+</html>

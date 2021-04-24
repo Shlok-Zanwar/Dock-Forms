@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Responses</title>
+</head>
+<style>
+
+.topnav {
+  overflow: hidden;
+  position: fixed;
+  background-color: #333;
+  padding: 0px 0px 0px;
+  top: 0%;
+  width: 100%;
+}
+
+.topbutton{
+  margin-right: 20px;
+  float: right;
+  background-color: #333;
+  border: transparent;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  width: auto;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topbutton:hover{
+    background-color: #ddd;
+    color: black;
+    cursor: pointer;
+}
+
+.table_div{
+    margin-left: 30px;
+    width: max-content;
+    padding: 0px 15px 15px;
+    border: 3px solid black;
+    border-radius: 5px;
+    min-width: 400px;
+    align-self: center;
+    align-items: center;
+    background-color: rgb(211, 169, 107);
+    
+}
+
+.div_class{
+    border: 8px outset #333;
+    padding: 10px 20px 15px;
+    text-align: center;
+    background-color:whitesmoke; 
+    position: fixed;
+    width: 400px;
+    max-height: 400px;
+    overflow: auto;
+    left: 33%;
+    border-radius: 20px;
+    z-index: 2;
+}
+
+.div_class1{
+    border: 8px outset #333;
+    padding: 10px 20px 15px;
+    text-align: left;
+    background-color:whitesmoke; 
+    position: fixed;
+    width: 400px;
+    max-height: 400px;
+    overflow: auto;
+    left: 33%;
+    border-radius: 20px;
+    z-index: 2;
+}
+
+.div_buttons{
+  width: 40%;
+  height: 100%;
+  border-radius: 3px;  
+  padding: 12px 15px;   
+  display: inline-block;   
+  border: 4px solid blueviolet;   
+  box-sizing: border-box; 
+  cursor: pointer;
+}
+
+
+.close_button{
+  width: 400px;
+  height: 10px;
+  position: fixed;
+  border-radius: 3px;  
+  padding: 8px 15px 20px;     
+  border: 4px solid blueviolet;  
+  font-weight: 700; 
+  background-color:#d1c4e9 ;
+  box-sizing: border-box; 
+  cursor: pointer;
+}
+
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: auto;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  overflow: auto;
+  width: 200px;
+  text-align: center;
+  padding: 8px 3px 8px;
+}
+
+</style>
+
+<body bgcolor="#d1c4e9" onload="onload_table(); make_table(); add_quesAnsSelect()">
+
+    <div class="topnav">
+        <input type="button" class="topbutton" value="Delete Response" onclick="unhideDel()">
+        <input type="button" class="topbutton" value="Questions" onclick="unhideQuesDiv()">
+        <input type="button" class="topbutton" value="Sort" onclick="unhideSort()">
+        <input type="button" class="topbutton" value="Save" onclick="saveAndContinue()">
+    </div>
+    <br><br><br><br>
+
+
+    <div class="div_class" id="sort_div" hidden>
+        <select id="sort_choice" name="sort_choice" class="div_buttons">
+            <option>User Id</option>
+            <option>Order of Response</option>
+            <option>Marks</option>
+        </select>
+
+        <input type="submit" class="div_buttons" value="Sort" onclick="get_selected()">
+        <br><br>
+        <input type="submit" class="div_buttons" value="Close" onclick="hide_sort_div()">
+    </div>
+    
+
+    <div id="question_info" class="div_class1" hidden>
+        <input type="submit" value="close" onclick="hide_ques_info()" class="close_button"><br><br>
+        
+    </div>
+
+    <div id="delete_div" class="div_class" hidden>
+        <input type="number" class="div_buttons" placeholder="Enter Sr No." id="del_sr_no">
+        <input type="submit" class="div_buttons" value="Delete" onclick="del_response()">
+        <br><br>
+        <input type="submit" class="div_buttons" value="Close" onclick="hide_delete_div()">
+    </div>
+
+    <div id="table_div" class="table_div">
+        <h2 id="TITLE">Responses Table : </h2>
+        <table id="data_table">
+
+        </table>
+    </div>
+
+<script>
+
+    function unhideDel(){
+        hide_ques_info()
+        hide_sort_div()
+        document.getElementById('delete_div').removeAttribute('hidden')
+    }
+
+    function unhideSort(){
+        hide_ques_info()
+        hide_delete_div()
+        document.getElementById('sort_div').removeAttribute('hidden')
+    }
+
+    function unhideQuesDiv(){
+        hide_sort_div()
+        hide_delete_div()
+        document.getElementById('question_info').removeAttribute('hidden')
+    }
+
+
+    function hide_delete_div(){
+        document.getElementById('delete_div').setAttribute('hidden', true)
+    }
+
+    function hide_ques_info(){
+        document.getElementById('question_info').setAttribute('hidden', true)
+    }
+
+    function hide_sort_div(){
+        document.getElementById('sort_div').setAttribute('hidden', true)
+    }
+
+    function sort_table(){
+        alert(document.getElementById('sort_choice').getAttribute('selected'))
+    }
+
+
+
+
+    function onload_table(){
+        id_info = localStorage.getItem('ids_for_edit')
+
+        var http = new XMLHttpRequest();
+        http.open("POST", "/getRespondentsData", false);
+        http.send(id_info);
+
+        respondents_data = JSON.parse(http.responseText)
+        //alert(JSON.stringify(respondents_data))
+
+        return respondents_data
+
+    }
+
+respondents_data = onload_table()
+
+
+
+    function add_quesAnsSelect(){
+
+        html_syntax = ""
+        html_syntax_select = ""
+
+        i = 0
+        while(i < respondents_data["Questions"].length){
+            q_no = i+1
+            html_syntax += "<br><br>Question "+q_no+" :<br>"+respondents_data["Questions"][i]
+            html_syntax_select += "<option>Question "+q_no+"</option>"
+
+            i += 1
+        }
+
+        document.getElementById('question_info').innerHTML += html_syntax
+        document.getElementById('sort_choice').innerHTML += html_syntax_select
+        document.getElementById('TITLE').innerHTML += "<u>"+respondents_data['Title']+"</u>"
+        
+       
+    }
+
+
+
+    function make_table(){
+
+        if(respondents_data['resData'].length == 0){
+            alert('No Responses')
+            window.location.href = "/home"
+        }
+
+        document.getElementById('data_table').innerHTML = ""
+
+        html_syntax = "<tr>"+
+                     "<th>Sr No.</th>"+
+                     "<th>User Id</th>"+
+                     "<th>Marks("+respondents_data['resData'][0]['Total_marks']+")</th>"
+
+        i = 0
+        while(i < respondents_data['Questions'].length){
+            html_syntax += "<th>Question "+i+"</th>"
+            
+            i += 1
+        }
+                                                           
+        html_syntax += "</tr>"
+
+        document.getElementById('data_table').innerHTML += html_syntax
+
+        html_syntax = ""
+        num_of_res = 0
+        while(num_of_res < respondents_data['resData'].length){
+
+            sr_no = num_of_res+1
+            
+            html_syntax += "<tr>"+
+                          "<td>"+sr_no+"</td>"+
+                          "<td>"+respondents_data['resData'][num_of_res]['User_ID']+"</td>"+
+                          "<td>"+respondents_data['resData'][num_of_res]['Marks']+"</td>"
+
+
+            i = 0
+            while(i < respondents_data['Questions'].length){
+                html_syntax += "<td>"+respondents_data['resData'][num_of_res]['Responses'][i]+"</td>"
+                i += 1
+            }
+                          
+            html_syntax += "</tr>"
+
+            num_of_res += 1
+        }
+        
+        document.getElementById('data_table').innerHTML += html_syntax
+    }
+
+
+
+
+    function del_response(){
+
+        total_res = respondents_data['resData'].length
+
+        //alert(document.getElementById('del_sr_no').value)
+
+        if(document.getElementById('del_sr_no').value < 1 || document.getElementById('del_sr_no').value > total_res){
+            alert("Please Enter valid Sr No.")
+        }
+
+        else{
+            confirmation = confirm("Are you sure you want to delete.\nData cannot be restored once saved.")
+
+            if(confirmation == true){
+                index_sr = document.getElementById('del_sr_no').value - 1
+                
+                respondents_data['resData'].splice(index_sr, 1)
+                document.getElementById('delete_div').setAttribute('hidden', true)
+                make_table()
+            }
+
+        }
+
+    }
+
+
+    function get_selected(){
+        alert(document.getElementById('sort_choice').value)
+
+    }
+    
+
+
+    function saveAndContinue(){
+        confirmation = confirm("Are you sure, changes cannot be restored once saved.")
+
+        if(confirmation == true){
+            var http = new XMLHttpRequest();
+            http.open("POST", "/saveChangesOfResponses", false);
+            http.send(JSON.stringify(respondents_data));
+            result = http.responseText
+
+            alert(result)
+            window.location.href = '/home'
+
+        }
+        else{
+            alert('Changes not saved')
+        }
+
+    }
+
+
+
+</script>
+
+</body>
+</html>

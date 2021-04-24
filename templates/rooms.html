@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rooms</title>
+</head>
+
+<style>
+.topnav {
+  overflow: hidden;
+  position: fixed;
+  background-color: #333;
+  padding: 0px 0px 0px 10px;
+  top: 0%;
+  width: 100%;
+}
+
+.topbutton{
+  margin-right: 20px;
+  float: right;
+  background-color: #333;
+  border: transparent;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  width: auto;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topbutton1{
+  
+  float: left;
+  background-color: #333;
+  border: transparent;
+  border-bottom: 2px solid #f2f2f2;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  width: auto;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topbutton:hover{
+    background-color: #ddd;
+    color: black;
+    cursor: pointer;
+}
+
+.div_class1{
+    border: 8px outset #333;
+    padding: 10px 20px 15px;
+    text-align: left;
+    background-color:whitesmoke; 
+    position: fixed;
+    width: 400px;
+    max-height: 400px;
+    overflow: auto;
+    left: 33%;
+    border-radius: 20px;
+    z-index: 2;
+}
+
+.div_class{
+    border: 8px outset #333;
+    padding: 10px 20px 15px;
+    text-align: center;
+    background-color:whitesmoke; 
+    position: fixed;
+    width: 400px;
+    max-height: 400px;
+    overflow: auto;
+    left: 33%;
+    border-radius: 20px;
+    z-index: 2;
+}
+
+.div_buttons{
+  width: 40%;
+  height: 100%;
+  border-radius: 3px;  
+  padding: 12px 15px;   
+  display: inline-block;   
+  border: 4px solid blueviolet;   
+  box-sizing: border-box; 
+  cursor: pointer;
+}
+
+
+.close_button{
+  width: 400px;
+  height: 10px;
+  position: fixed;
+  border-radius: 3px;  
+  padding: 8px 15px 20px;     
+  border: 4px solid blueviolet;  
+  font-weight: 700; 
+  background-color:#d1c4e9 ;
+  box-sizing: border-box; 
+  cursor: pointer;
+}
+
+.table_div{
+    margin-left: 400px;
+    width: max-content;
+    padding: 0px 15px 15px;
+    border: 3px solid black;
+    border-radius: 5px;
+    min-width: 400px;
+    align-self: center;
+    align-items: center;
+    background-color: rgb(211, 169, 107);
+    
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: auto;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  overflow: auto;
+  text-align: center;
+  padding: 8px 3px 8px;
+}
+
+</style>
+
+
+<body bgcolor="#d1c4e9" onload="check_if_new(); make_table()">
+    <div class="topnav">
+        <label for="room_name" class="topbutton1">Room name : </label>
+        <input type="text" id="room_name" value="Room Name" class="topbutton1">
+        <input type="button" class="topbutton" value="Delete User" onclick="unhideDel()">
+        <input type="button" class="topbutton" value="Add User" onclick="unhideAdd()">
+        <input type="button" class="topbutton" value="Sort" onclick="unhideSort()">
+        <input type="button" class="topbutton" value="Save" onclick="saveAndContinue()">
+    </div>
+    <br><br><br><br>
+
+    <div class="div_class" id="sort_div" hidden>
+        <select id="sort_choice" name="sort_choice" class="div_buttons">
+            <option>User Id</option>
+            <option>Name</option>
+        </select>
+
+        <input type="submit" class="div_buttons" value="Sort" onclick="get_selected()">
+        <br><br>
+        <input type="submit" class="div_buttons" value="Close" onclick="hide_sort_div()">
+    </div>
+
+    <div id="add_div" class="div_class" hidden>
+        <input type="number" class="div_buttons" placeholder="Enter User Id" id="add_user_id">
+        <input type="submit" class="div_buttons" value="Add" onclick="add_user_id()">
+        <br><br>
+        <input type="submit" class="div_buttons" value="Close" onclick="hide_add_div()">
+    </div>
+
+    <div id="delete_div" class="div_class" hidden>
+        <input type="number" class="div_buttons" placeholder="Enter Sr No." id="del_sr_no">
+        <input type="submit" class="div_buttons" value="Delete" onclick="remove_user()">
+        <br><br>
+        <input type="submit" class="div_buttons" value="Close" onclick="hide_delete_div()">
+    </div>
+
+
+    <div id="table_div" class="table_div">
+        <h2 id="TITLE">Room members : </h2>
+        <table id="data_table">
+
+        </table>
+    </div>
+
+
+<script>
+
+    function unhideDel(){
+        hide_add_div()
+        hide_sort_div()
+        document.getElementById('delete_div').removeAttribute('hidden')
+    }
+
+    function unhideSort(){
+        hide_add_div()
+        hide_delete_div()
+        document.getElementById('sort_div').removeAttribute('hidden')
+    }
+
+    function unhideAdd(){
+        hide_sort_div()
+        hide_delete_div()
+        document.getElementById('add_div').removeAttribute('hidden')
+    }
+
+    function hide_delete_div(){
+        document.getElementById('delete_div').setAttribute('hidden', true)
+    }
+
+    function hide_add_div(){
+        document.getElementById('add_div').setAttribute('hidden', true)
+    }
+
+    function hide_sort_div(){
+        document.getElementById('sort_div').setAttribute('hidden', true)
+    }
+
+
+
+    function check_if_new(){
+
+        data = JSON.parse(localStorage.getItem('room_id_info'))
+
+        if (data['Room_ID'] == 0){
+            get_room_data = {
+                "Room_ID":0,
+                "User_ID":parseInt(localStorage.getItem('login_id')),
+                "Room_Name":"Unnamed Room",
+                "People":[]
+            }
+        }
+
+        else{
+            var http = new XMLHttpRequest();
+            send_data = {
+                "Status":"Get Room data",
+                "Room_ID":data['Room_ID']
+            }
+
+            var myJSON = JSON.stringify(send_data)
+            http.open("POST", "/roomDataInfo", false);
+            http.send(myJSON);
+
+            get_room_data = JSON.parse(http.responseText)
+
+        }
+        document.getElementById('room_name').value = get_room_data['Room_Name']
+        
+        return get_room_data
+
+    }
+
+
+
+room_data = check_if_new()
+
+
+
+    function make_table(){
+        document.getElementById('data_table').innerHTML = ""
+
+        html_syntax ="<colgroup><col style='width:100px'><col style='width: 100px;'><col style='width: 300px'></colgroup>"+
+                     "<tr>"+
+                     "<th>Sr No.</th>"+
+                     "<th>User Id</th>"+
+                     "<th>User Name</th>"+
+                     "</tr>"
+
+        document.getElementById('data_table').innerHTML += html_syntax
+        
+
+        html_syntax = ""
+        i = 0
+        //alert(room_data['People'].length)
+        while(i < room_data['People'].length){
+            sr_no = i+1
+            html_syntax += "<tr>"+
+                           "<td>"+sr_no+"</td>"+
+                           "<td>"+room_data['People'][i][0]+"</td>"+
+                           "<td>"+room_data['People'][i][1]+"</td>"+
+                           "</tr>"
+            i += 1
+        }
+        document.getElementById('data_table').innerHTML += html_syntax
+
+    }
+
+
+
+
+    function add_user_id(){
+        if(document.getElementById('add_user_id').value == "" || document.getElementById('add_user_id').value != parseInt(document.getElementById('add_user_id').value)){
+            alert("Please Enter Valid User Id")
+        }
+        else{
+            check = check_if_added()
+            if(check == true){
+
+                send_data = {
+                    "Status":"Get Add User data",
+                    "User_ID":document.getElementById('add_user_id').value
+                }
+                var http = new XMLHttpRequest();
+                var myJSON = JSON.stringify(send_data)
+                http.open("POST", "/roomDataInfo", false);
+                http.send(myJSON);
+
+                response_data = JSON.parse(http.responseText)
+
+                if(response_data['Status'] == "Successful"){
+                    confirmation = confirm("Name : "+response_data['User_name']+"\nUser Id : "+response_data['User_ID']+"\n\nAre you sure you want to add.")
+
+                    if (confirmation == true){
+                        
+                        arr = [response_data['User_ID'], response_data['User_name']]
+                        room_data['People'].push(arr)
+                        //alert(JSON.stringify(room_data))
+
+                        make_table()
+                        hide_add_div()
+                    }
+
+                }
+                else{
+                    alert(response_data['Status'])
+                }
+            }
+            else{
+                alert('User already added')
+            }
+
+        }
+    }
+
+
+
+    function check_if_added(){
+        i = 0
+        while(i < room_data['People'].length){
+            if(document.getElementById('add_user_id').value == room_data['People'][i][0]){
+                return false
+            }
+            i+=1
+        }
+        return true
+    }
+
+
+
+    function remove_user(){
+        total_users = room_data['People'].length
+        //alert(document.getElementById('del_sr_no').value)
+
+        if(document.getElementById('del_sr_no').value < 1 || document.getElementById('del_sr_no').value > total_users){
+            alert("Please Enter valid Sr No.")
+        }
+        else{
+            confirmation = confirm("Are you sure you want to delete.")
+            if(confirmation == true){
+                index_sr = document.getElementById('del_sr_no').value - 1
+
+                room_data['People'].splice(index_sr, 1)
+                make_table()
+                hide_delete_div()
+            }
+        }
+    }
+
+
+
+    function saveAndContinue(){
+        confirmation = confirm("Are you sure you want to save ?")
+
+        if(confirmation == true){
+            room_data['Room_Name'] = document.getElementById('room_name').value
+            var http = new XMLHttpRequest();
+            http.open("POST", "/saveRoomData", false);
+            http.send(JSON.stringify(room_data));
+
+            result = http.responseText
+            alert(result)
+            window.location.href = "/home"
+        }
+
+    }
+ 
+
+
+</script>
+
+
+</body>
+</html>

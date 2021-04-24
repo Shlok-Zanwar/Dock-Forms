@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+
+.topnav {
+  overflow: hidden;
+  position: fixed;
+  background-color: #333;
+  padding: 0px 0px 0px 10px;
+  top: 0%;
+  width: 100%;
+}
+
+.topbutton{
+  margin-right: 20px;
+  float: right;
+  background-color: #333;
+  border: transparent;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  width: auto;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topbutton:hover{
+    background-color: #ddd;
+    color: black;
+    cursor: pointer;
+}
+
+.div_class{
+    border: 8px outset #333;
+    padding: 10px 20px 15px;
+    text-align: center;
+    background-color:whitesmoke; 
+    position: fixed;
+    width: 400px;
+    max-height: 400px;
+    overflow: auto;
+    left: 33%;
+    border-radius: 20px;
+    z-index: 2;
+}
+
+.div_class1{
+    border: 8px outset #333;
+    padding: 10px 20px 15px;
+    text-align: left;
+    background-color:whitesmoke; 
+    position: fixed;
+    width: 400px;
+    max-height: 400px;
+    overflow: auto;
+    left: 33%;
+    border-radius: 20px;
+    z-index: 2;
+}
+
+.div_buttons{
+  width: 40%;
+  height: 100%;
+  border-radius: 3px;  
+  padding: 12px 15px;   
+  display: inline-block;   
+  border: 4px solid blueviolet;   
+  box-sizing: border-box; 
+  cursor: pointer;
+}
+
+.close_button{
+  width: 400px;
+  height: 10px;
+  position: fixed;
+  border-radius: 3px;  
+  padding: 8px 15px 20px;     
+  border: 4px solid blueviolet;  
+  font-weight: 700; 
+  background-color:#d1c4e9 ;
+  box-sizing: border-box; 
+  cursor: pointer;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse ;
+  border: 2px solid black;
+  width: auto;
+}
+
+td, th {
+  border: 2px solid black;
+  overflow: auto;
+  text-align: center;
+  padding: 8px 3px 8px;
+}
+
+.table_div{
+    margin-left: 400px;
+    width: max-content;
+    padding: 0px 15px 15px;
+    border: 3px solid black;
+    border-radius: 5px;
+    min-width: 400px;
+    align-self: center;
+    align-items: center;
+    background-color: rgb(211, 169, 107);
+    
+}
+
+
+</style>
+<body bgcolor="#d1c4e9" onload="fill_my_rooms(); make_table()">
+
+    <div class="topnav">
+        <input type="button" class="topbutton" value="Remove Room" onclick="unhideRemove()">
+        <input type="button" class="topbutton" value="Add Room" onclick="unhideAdd()">
+        <input type="button" class="topbutton" value="My Rooms" onclick="unhideRoomsInfo()">
+        <input type="button" class="topbutton" value="Save" onclick="saveAndContinue()">
+    </div>
+
+    <br><br><br>
+
+    <div id="rooms_info" class="div_class1" hidden>
+        <input type="submit" value="close" onclick="hide_rooms_info()" class="close_button"><br><br><br>
+        Your Rooms<br><br>
+        <table id="rooms_info_table">
+            <colgroup>
+                <col style="width:120px">
+                <col style="width:270px;">
+            </colgroup>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </table>
+
+    </div>
+
+    <div id="add_room" class="div_class" hidden>
+        <input type="number" class="div_buttons" placeholder="Enter Room Id" id="add_room_no">
+        <input type="submit" class="div_buttons" value="Add" onclick="add_room()">
+        <br><br>
+        <input type="submit" class="div_buttons" value="Close" onclick="hide_add_div()">
+    </div>
+
+    <div id="remove_room" class="div_class" hidden>
+        <input type="number" class="div_buttons" placeholder="Enter Room Id" id="remove_room_no">
+        <input type="submit" class="div_buttons" value="Remove" onclick="remove_room()">
+        <br><br>
+        <input type="submit" class="div_buttons" value="Close" onclick="hide_remove_div()">
+    </div>
+
+    <div id="table_div" class="table_div">
+        <h2 id="TITLE">Rooms connected : </h2>
+        <table id="data_table">
+
+        </table>
+    </div>
+
+<script>
+
+
+    function hide_add_div(){
+        document.getElementById('add_room').setAttribute('hidden', true)
+    }
+
+    function hide_remove_div(){
+        document.getElementById('remove_room').setAttribute('hidden', true)
+    }
+
+    function hide_rooms_info(){
+        document.getElementById('rooms_info').setAttribute('hidden', true)
+    }
+
+    function unhideRoomsInfo(){
+        hide_add_div()
+        hide_remove_div()
+        document.getElementById('rooms_info').removeAttribute('hidden')
+    }
+
+    function unhideRemove(){
+        hide_rooms_info()
+        hide_add_div()
+        document.getElementById('remove_room').removeAttribute('hidden')
+    }
+
+    function unhideAdd(){
+        hide_remove_div()
+        hide_rooms_info()
+        document.getElementById('add_room').removeAttribute('hidden')
+    }
+
+//give info about all his forms
+    function fill_my_rooms(){
+        old_rooms = JSON.parse(localStorage.getItem('owned_rooms'))
+        
+        html_syntax = ""
+        i = 0
+        while(i<old_rooms['old_rooms'].length){
+            html_syntax += "<tr>"+
+                           "<td>"+old_rooms['old_rooms'][i][0]+"</td>"+
+                           "<td>"+old_rooms['old_rooms'][i][1]+"</td>"+
+                           "</tr>"
+                           
+            i += 1
+        }
+        document.getElementById('rooms_info_table').innerHTML += html_syntax
+    }
+
+
+    function get_old_forms(){
+        send_data = {
+            'Status':'Get rooms connected',
+            'QPaper_ID':localStorage.getItem('formIdForRooms')
+        }
+
+        var http = new XMLHttpRequest();
+        var myJSON = JSON.stringify(send_data)
+        http.open("POST", "/roomDataInfo", false);
+        http.send(myJSON);
+
+        result_data = JSON.parse(http.responseText)
+        //alert(JSON.stringify(result_data))
+        return result_data
+    }
+
+//main data variable where all changes  are made and later uploaded 
+old_data = get_old_forms()  
+
+//make main table
+    function make_table(){
+        document.getElementById('data_table').innerHTML = ""
+
+        html_syntax ="<colgroup><col style='width:200px'><col style='width: 300px;'></colgroup>"+
+                     "<tr>"+
+                     "<th>Room Id</th>"+
+                     "<th>Room name</th>"+
+                     "</tr>"
+
+        document.getElementById('data_table').innerHTML += html_syntax
+
+        html_syntax = ""
+        //adding all other rows
+        i = 0
+        while(i < old_data['rooms'].length){
+            html_syntax += "<tr>"+
+                           "<td>"+old_data['rooms'][i][0]+"</td>"+
+                           "<td>"+old_data['rooms'][i][1]+"</td>"+
+                           "</tr>"
+
+            i += 1
+        }
+        document.getElementById('data_table').innerHTML += html_syntax
+    }
+
+
+//connecting a new room
+    function add_room(){
+        if(document.getElementById('add_room_no').value == "" || document.getElementById('add_room_no').value != parseInt(document.getElementById('add_room_no').value)){
+            alert("Invalid Room Id")
+            return 0
+        }
+        
+        //checking if already added
+        i=0
+        while(i < old_data['rooms'].length){
+            if(document.getElementById('add_room_no').value == old_data['rooms'][i][0]){
+                alert('Room already connected')
+                return 0
+            }
+
+            i += 1
+        }
+
+        //checking if room is owned
+        checkVar = false
+        old_rooms = JSON.parse(localStorage.getItem('owned_rooms'))
+        i = 0
+        while(i < old_rooms['old_rooms'].length){
+            if(document.getElementById('add_room_no').value == old_rooms['old_rooms'][i][0]){
+                room_name = old_rooms['old_rooms'][i][1]
+                checkVar = true
+                break;
+            }
+
+            i += 1
+        }
+
+        if(checkVar != true){
+            alert('You dont own the room with Room Id - '+document.getElementById('add_room_no').value)
+            return 0
+        }
+
+        //now adding room
+        arr = [document.getElementById('add_room_no').value, room_name]
+        old_data['rooms'].push(arr)
+        make_table()
+        hide_add_div()
+    }
+
+//remove connection to a room
+    function remove_room(){
+        if(document.getElementById('remove_room_no').value == "" || document.getElementById('remove_room_no').value != parseInt(document.getElementById('remove_room_no').value)){
+            alert("Invalid Room Id")
+            return 0
+        }
+
+        checkVar = false
+        //checking if this room is added
+        i = 0
+        while(i < old_data['rooms'].length){
+
+            if(document.getElementById('remove_room_no').value == old_data['rooms'][i][0]){
+                toSplice = i
+                checkVar = true
+                break;
+            }
+            i += 1
+        }
+        //validating
+        if(checkVar != true){
+            alert("Room Id - "+document.getElementById('remove_room_no').value+"\nis already not added")
+            return 0
+        }
+
+        //alert(toSplice)
+        old_data['rooms'].splice(toSplice, 1)
+        make_table()
+        hide_remove_div()
+    }
+
+
+    function saveAndContinue(){
+        old_data['Status'] = "Save Connect Changes"
+
+        var http = new XMLHttpRequest();
+        var myJSON = JSON.stringify(old_data)
+        http.open("POST", "/roomDataInfo", false);
+        http.send(myJSON);
+
+        abc = http.responseText
+        window.location.href = "/home"
+
+    }
+</script>
+
+</body>
+</html>
