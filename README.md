@@ -6,19 +6,19 @@ Checkout the blog on this project :- https://shlok-zanwar.github.io/blogs/dock-f
 
 
 ### Key features :-
-  * A whole new functionality of rooms (Basically creating a group of accounts) and on connecting rooms to your forms you can restrict the form to only limited people
-  * Lock form Response (Currently accepting responses)
-  * limiting to one response
-  * Edit form after it is made
+  * A whole new functionality of rooms
+     * Create a group of students/users.
+     * Rooms can then be assigned to the forms to restrict the visiblity of the forms to the users in the room.
+  * Lock form Response (Currently accepting responses).
+  * Limiting form to one response per user.
+  * Edit form anytime.
   * Home screen with all previously created forms + rooms.
-  * Dedicated page for responses in a html table format.
-  * Rooms editor and connect rooms to Forms dedicated pages
+  * Dedicated page for responses in a pretty tabular format.
   * Mail verification OTP using smtplib.
-  * used SQL Database as well a self created non SQL JSONbases database
-  * 4 types of questions (mcq (without ans), mcq(survey type), range type, text type) <br />
+  * 4 types of questions (mcq (without ans), mcq(survey type), range type, text type). <br />
   
-### Languages:
-  * Frontend : Javascript, html, css
-  * Backend : Python
-  * Server : Flask
-  * Database : SQL Workbench (Windows) + self created database for storing array kind values
+### Technologies:
+  * Frontend : Javascript, html, css.
+  * Backend : Python.
+  * Server : Flask.
+  * Database : SQL Workbench (Windows) + file handling based JSON Files database (self created).
